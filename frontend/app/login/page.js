@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
 
    const router = useRouter();
+   const { setUser } = useAuth();
 
    const [formData, setFormData] = useState({
       email: "",
@@ -64,8 +66,9 @@ export default function LoginPage() {
             throw new Error(data.message || "Login failed");
          }
 
-         router.push("/profile");
+         setUser(data.user);
 
+         router.push("/profile");
       } catch (err) {
 
          setError(err.message);

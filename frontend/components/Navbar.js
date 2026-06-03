@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 import {
    LayoutDashboard,
@@ -48,9 +49,8 @@ const navItems = [
 ];
 
 export default function Navbar() {
-
    const [mobileMenu, setMobileMenu] = useState(false);
-
+   const { user, loading } = useAuth();
    return (
       <>
          {/* Navbar */}
@@ -106,19 +106,47 @@ export default function Navbar() {
                   {/* Auth Buttons */}
                   <div className="flex items-center gap-2">
 
-                     <Link
-                        href="/login"
-                        className="px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 border border-white/10 transition-all duration-300"
-                     >
-                        Login
-                     </Link>
+                     {user ? (
 
-                     <Link
-                        href="/signup"
-                        className="px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:scale-105 transition-all duration-300 shadow-lg shadow-cyan-500/20"
-                     >
-                        Sign Up
-                     </Link>
+                        <Link
+                           href="/profile"
+                           className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-all duration-300"
+                        >
+
+                           <img
+                              src={
+                                 user.profilePic ||
+                                 `https://ui-avatars.com/api/?name=${user.name}`
+                              }
+                              alt={user.name}
+                              className="w-9 h-9 rounded-full object-cover border border-white/20"
+                           />
+
+                           <span className="text-white text-sm font-medium">
+                              {user.name}
+                           </span>
+
+                        </Link>
+
+                     ) : (
+
+                        <>
+                           <Link
+                              href="/login"
+                              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 border border-white/10 transition-all duration-300"
+                           >
+                              Login
+                           </Link>
+
+                           <Link
+                              href="/signup"
+                              className="px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:scale-105 transition-all duration-300 shadow-lg shadow-cyan-500/20"
+                           >
+                              Sign Up
+                           </Link>
+                        </>
+
+                     )}
 
                   </div>
 
@@ -138,11 +166,10 @@ export default function Navbar() {
 
          {/* Mobile Sidebar */}
          <div
-            className={`fixed inset-0 z-[60] transition-all duration-300 ${
-               mobileMenu
-                  ? "visible opacity-100"
-                  : "invisible opacity-0"
-            }`}
+            className={`fixed inset-0 z-[60] transition-all duration-300 ${mobileMenu
+               ? "visible opacity-100"
+               : "invisible opacity-0"
+               }`}
          >
 
             {/* Overlay */}
@@ -153,11 +180,10 @@ export default function Navbar() {
 
             {/* Sidebar */}
             <div
-               className={`absolute top-0 right-0 h-full w-[280px] bg-[#0f172a] border-l border-white/10 p-6 transform transition-transform duration-300 ${
-                  mobileMenu
-                     ? "translate-x-0"
-                     : "translate-x-full"
-               }`}
+               className={`absolute top-0 right-0 h-full w-[280px] bg-[#0f172a] border-l border-white/10 p-6 transform transition-transform duration-300 ${mobileMenu
+                  ? "translate-x-0"
+                  : "translate-x-full"
+                  }`}
             >
 
                {/* Top */}

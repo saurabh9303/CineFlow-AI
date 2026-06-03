@@ -3,8 +3,11 @@ import { generateScript } from "../services/script.service.js";
 import { generateVoice } from "../services/voice.service.js";
 import { generateVideo } from "../services/video.service.js";
 import { mergeAudioVideo } from "../services/ffmpeg.service.js";
-import { uploadToYoutube } from "../services/upload.service.js";
-import { uploadVideoToCloudinary } from "../services/cloudinary.service.js";
+import { generateThumbnail } from "../services/thumbnail.service.js";
+import {
+   uploadVideoToCloudinary,
+   uploadThumbnailToCloudinary,
+} from "../services/cloudinary.service.js";
 import Short from "../models/short.model.js";
 
 export async function createShort(onProgress, userId) {
@@ -17,8 +20,9 @@ export async function createShort(onProgress, userId) {
       audio: null,
       video: null,
       finalVideo: null,
+      thumbnail: null,
       cloudinary: null,
-      upload: null,
+      thumbnailCloudinary: null,
       db: null,
       status: "processing",
    };
@@ -67,40 +71,70 @@ export async function createShort(onProgress, userId) {
       );
 
       console.log("✅ Final Video Created:", result.finalVideo);
+      // ---------------- THUMBNAIL ----------------
+      console.log("🖼️ [STEP 6] Generating Thumbnail...");
+      onProgress("🖼️ Generating Thumbnail");
 
+      result.thumbnail =
+         await generateThumbnail();
+
+      console.log(
+         "✅ Thumbnail Generated:",
+         result.thumbnail
+      );
       // ---------------- CLOUDINARY ----------------
-      // console.log("☁️ [STEP 6] Cloudinary Disabled (Testing Mode)");
+      // ---------------- CLOUDINARY ----------------
+      // console.log("☁️ [STEP 7] Cloudinary Disabled (Testing Mode)");
       // onProgress("☁️ Cloudinary Disabled");
 
       // result.cloudinary = {
       //    url: result.finalVideo,
-      //    public_id: "cloudinary-disabled"
+      //    public_id: "video-disabled",
+      // };
+
+      // result.thumbnailCloudinary = {
+      //    url: result.thumbnail,
+      //    public_id: "thumbnail-disabled",
       // };
 
       // console.log("✅ Fake Cloudinary Response:");
+      // console.log("🔗 Video URL:", result.cloudinary.url);
+      // console.log("🆔 Video ID:", result.cloudinary.public_id);
+
+      // console.log("🖼️ Thumbnail URL:", result.thumbnailCloudinary.url);
+      // console.log("🆔 Thumbnail ID:", result.thumbnailCloudinary.public_id);
+
+      // ############# 1ND Original Cloudinery code with thumbnail ##############3
+
+      console.log("☁️ [STEP 7] Uploading Video...");
+      onProgress("☁️ Uploading Video");
+
+      result.cloudinary =
+         await uploadVideoToCloudinary(
+            result.finalVideo
+         );
+
+      console.log("☁️ [STEP 8] Uploading Thumbnail...");
+      onProgress("☁️ Uploading Thumbnail");
+
+      result.thumbnailCloudinary =
+         await uploadThumbnailToCloudinary(
+            result.thumbnail
+         );
+
+
+      // ############# 2ND Original Cloudinery code ##############3
+
+      // console.log("☁️ [STEP 6] Uploading to Cloudinary...");
+      // onProgress("☁️ Uploading to Cloudinary");
+
+      // result.cloudinary = await uploadVideoToCloudinary(
+      //    result.finalVideo
+      // );
+
+      // console.log("✅ Cloudinary Upload Success:");
       // console.log("   🔗 URL:", result.cloudinary.url);
       // console.log("   🆔 Public ID:", result.cloudinary.public_id);
-
-      // ############## Original Cloudinery code ##############3
-
-      console.log("☁️ [STEP 6] Uploading to Cloudinary...");
-      onProgress("☁️ Uploading to Cloudinary");
-
-      result.cloudinary = await uploadVideoToCloudinary(
-         result.finalVideo
-      );
-
-      console.log("✅ Cloudinary Upload Success:");
-      console.log("   🔗 URL:", result.cloudinary.url);
-      console.log("   🆔 Public ID:", result.cloudinary.public_id);
-
-      // ---------------- YOUTUBE ----------------
-      console.log("📤 [STEP 7] Uploading to YouTube...");
-      onProgress("📤 Uploading to YouTube");
-
-      result.upload = await uploadToYoutube(result.finalVideo);
-
-      console.log("✅ YouTube Upload Done:", result.upload);
 
       // ---------------- DB SAVE ----------------
       console.log("💾 [STEP 8] Saving to Database...");
@@ -108,18 +142,30 @@ export async function createShort(onProgress, userId) {
 
       result.db = await Short.create({
          userId,
+
          topic: result.topic,
+
          script: result.script,
+
          audioUrl: result.audio,
+
          videoUrl: result.cloudinary.url,
-         cloudinaryPublicId: result.cloudinary.public_id,
-         youtubeUrl: result.upload?.url || null,
+
+         thumbnailUrl:
+            result.thumbnailCloudinary.url,
+
+         cloudinaryVideoId:
+            result.cloudinary.public_id,
+
+         cloudinaryThumbnailId:
+            result.thumbnailCloudinary.public_id,
+
+         status: "completed",
       });
 
       console.log("✅ DB Saved Successfully:");
       console.log("   📄 DB ID:", result.db._id);
       console.log("   ☁️ Cloudinary URL:", result.cloudinary.url);
-      console.log("   📺 YouTube URL:", result.upload?.url);
 
       // ---------------- COMPLETE ----------------
       console.log("🎉 [WORKFLOW COMPLETE]");
@@ -132,6 +178,8 @@ export async function createShort(onProgress, userId) {
       console.error("❌ [WORKFLOW ERROR]:", error);
 
       onProgress("❌ Failed");
+
+      result.status = "failed";
 
       throw error;
    }

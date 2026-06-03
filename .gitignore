@@ -20,3 +20,24 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Ignore temp folder contents
+backend/src/temp/*
+
+# Keep folders
+!backend/src/temp/audio/
+!backend/src/temp/video/
+!backend/src/temp/final/
+!backend/src/temp/thumb/
+
+# Ignore everything inside those folders
+backend/src/temp/audio/*
+backend/src/temp/video/*
+backend/src/temp/final/*
+backend/src/temp/thumb/*
+
+# Except .gitkeep
+!backend/src/temp/audio/.gitkeep
+!backend/src/temp/video/.gitkeep
+!backend/src/temp/final/.gitkeep
+!backend/src/temp/thumb/.gitkeep
