@@ -1,191 +1,236 @@
 "use client";
+
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SettingsPage() {
-  const [profile, setProfile] = useState({
-    name: "",
-    email: "",
-    username: "",
-  });
 
-  const [preferences, setPreferences] = useState({
-    notifications: true,
-    autoPublish: false,
-    darkMode: true,
-  });
+  const { user } = useAuth();
+
+  const [loading, setLoading] = useState(false);
+
+  const connectYoutube = async () => {
+
+    try {
+
+      const response = await fetch(
+        "http://localhost:8000/api/integrations/youtube/connect",
+        {
+          credentials: "include"
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+
+        alert(data.message);
+
+        return;
+      }
+
+      window.location.href = data.authUrl;
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert("Something went wrong");
+
+    }
+
+  };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#0b1120] via-[#111827] to-[#172554] text-white pt-24 px-4 sm:px-6 lg:px-8">
 
-      <div className="max-w-5xl mx-auto space-y-8">
+    <main className="min-h-screen bg-[#0f172a] text-white pt-24 px-4">
 
-        {/* Header */}
-        <section className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-10">
+      <div className="max-w-4xl mx-auto space-y-6">
 
-          <h1 className="text-4xl font-bold mb-4">
+        <div>
+
+          <h1 className="text-3xl font-bold">
             Settings
           </h1>
 
-          <p className="text-gray-400 max-w-2xl">
-            Manage your account settings, preferences, and AI automation controls.
+          <p className="text-gray-400">
+            Manage your connected accounts.
           </p>
 
-        </section>
+        </div>
 
-        {/* Profile Settings */}
-        <section className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8">
+        {/* Account Overview */}
 
-          <h2 className="text-2xl font-bold mb-6">
-            Profile Information
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+
+          <h2 className="text-xl font-semibold mb-4">
+            Account Overview
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <p>
+            <span className="text-gray-400">
+              Name:
+            </span>{" "}
+            {user?.name}
+          </p>
+
+          <p>
+            <span className="text-gray-400">
+              Email:
+            </span>{" "}
+            {user?.email}
+          </p>
+
+        </div>
+
+        {/* Social Accounts */}
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+
+          <h2 className="text-xl font-semibold mb-6">
+            Social Accounts
+          </h2>
+
+          {/* YouTube */}
+
+          <div className="flex items-center justify-between border border-white/10 rounded-xl p-4">
 
             <div>
-              <label className="text-sm text-gray-400">Full Name</label>
-              <input
-                type="text"
-                placeholder="Enter your name"
-                className="w-full mt-2 px-4 py-3 rounded-xl bg-[#0f172a] border border-white/10 outline-none focus:border-cyan-500"
-                value={profile.name}
-                onChange={(e) =>
-                  setProfile({ ...profile, name: e.target.value })
-                }
-              />
+
+              <h3 className="font-medium">
+                YouTube
+              </h3>
+
+              {
+                user?.socialAccounts?.youtube?.connected ? (
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-red-500 flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">
+                        YT
+                      </span>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">
+                        {user?.socialAccounts?.youtube?.channelTitle}
+                      </p>
+
+                      <p className="text-sm text-gray-400 truncate">
+                        {user?.socialAccounts?.youtube?.channelHandle}
+                      </p>
+                    </div>
+
+                    <span className="px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-medium">
+                      Connected
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center">
+                      <span className="text-xs font-bold">
+                        YT
+                      </span>
+                    </div>
+
+                    <span className="text-gray-400">
+                      Not Connected
+                    </span>
+                  </div>
+                )
+              }
+
             </div>
 
-            <div>
-              <label className="text-sm text-gray-400">Email</label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full mt-2 px-4 py-3 rounded-xl bg-[#0f172a] border border-white/10 outline-none focus:border-cyan-500"
-                value={profile.email}
-                onChange={(e) =>
-                  setProfile({ ...profile, email: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="text-sm text-gray-400">Username</label>
-              <input
-                type="text"
-                placeholder="Choose a username"
-                className="w-full mt-2 px-4 py-3 rounded-xl bg-[#0f172a] border border-white/10 outline-none focus:border-cyan-500"
-                value={profile.username}
-                onChange={(e) =>
-                  setProfile({ ...profile, username: e.target.value })
-                }
-              />
-            </div>
+            <button
+              onClick={connectYoutube}
+              disabled={loading}
+              className="px-4 py-2 cursor-pointer bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
+            >
+              {
+                loading
+                  ? "Connecting..."
+                  : user?.socialAccounts?.youtube?.connected
+                    ? "Reconnect"
+                    : "Connect"
+              }
+            </button>
 
           </div>
 
-          <button className="mt-6 px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold hover:scale-105 transition">
-            Save Profile
-          </button>
+          {/* Instagram */}
 
-        </section>
+          <div className="flex items-center justify-between border border-white/10 rounded-xl p-4 mt-4">
 
-        {/* Preferences */}
-        <section className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8">
+            <div>
 
-          <h2 className="text-2xl font-bold mb-6">
-            Preferences
-          </h2>
+              <h3 className="font-medium">
+                Instagram
+              </h3>
 
-          <div className="space-y-5">
+              {
+                user?.socialAccounts?.instagram?.connected
+                  ? (
+                    <p className="text-green-400 text-sm">
+                      Connected
+                    </p>
+                  )
+                  : (
+                    <p className="text-gray-400 text-sm">
+                      Not Connected
+                    </p>
+                  )
+              }
 
-            {/* Notifications */}
-            <div className="flex items-center justify-between p-5 rounded-2xl border border-white/10 bg-[#0f172a]/60">
-              <div>
-                <h3 className="font-semibold">Notifications</h3>
-                <p className="text-gray-400 text-sm">
-                  Receive updates about your content performance
-                </p>
-              </div>
-
-              <input
-                type="checkbox"
-                checked={preferences.notifications}
-                onChange={() =>
-                  setPreferences({
-                    ...preferences,
-                    notifications: !preferences.notifications,
-                  })
-                }
-                className="w-5 h-5"
-              />
             </div>
 
-            {/* Auto Publish */}
-            <div className="flex items-center justify-between p-5 rounded-2xl border border-white/10 bg-[#0f172a]/60">
-              <div>
-                <h3 className="font-semibold">Auto Publish</h3>
-                <p className="text-gray-400 text-sm">
-                  Automatically publish generated content
-                </p>
-              </div>
-
-              <input
-                type="checkbox"
-                checked={preferences.autoPublish}
-                onChange={() =>
-                  setPreferences({
-                    ...preferences,
-                    autoPublish: !preferences.autoPublish,
-                  })
-                }
-                className="w-5 h-5"
-              />
-            </div>
-
-            {/* Dark Mode */}
-            <div className="flex items-center justify-between p-5 rounded-2xl border border-white/10 bg-[#0f172a]/60">
-              <div>
-                <h3 className="font-semibold">Dark Mode</h3>
-                <p className="text-gray-400 text-sm">
-                  Keep UI in dark theme (recommended)
-                </p>
-              </div>
-
-              <input
-                type="checkbox"
-                checked={preferences.darkMode}
-                onChange={() =>
-                  setPreferences({
-                    ...preferences,
-                    darkMode: !preferences.darkMode,
-                  })
-                }
-                className="w-5 h-5"
-              />
-            </div>
+            <button
+              className="px-4 py-2 bg-pink-600 rounded-lg opacity-50 cursor-not-allowed"
+            >
+              Coming Soon
+            </button>
 
           </div>
 
-        </section>
+          {/* Facebook */}
 
-        {/* Danger Zone */}
-        <section className="rounded-3xl border border-red-500/20 bg-red-500/5 backdrop-blur-xl p-8">
+          <div className="flex items-center justify-between border border-white/10 rounded-xl p-4 mt-4">
 
-          <h2 className="text-2xl font-bold text-red-400 mb-4">
-            Danger Zone
-          </h2>
+            <div>
 
-          <p className="text-gray-400 mb-6">
-            Once you delete your account, there is no going back.
-          </p>
+              <h3 className="font-medium">
+                Facebook
+              </h3>
 
-          <button className="px-6 py-3 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-300 hover:bg-red-500/30 transition">
-            Delete Account
-          </button>
+              {
+                user?.socialAccounts?.facebook?.connected
+                  ? (
+                    <p className="text-green-400 text-sm">
+                      Connected
+                    </p>
+                  )
+                  : (
+                    <p className="text-gray-400 text-sm">
+                      Not Connected
+                    </p>
+                  )
+              }
 
-        </section>
+            </div>
+
+            <button
+              className="px-4 py-2 bg-blue-600 rounded-lg opacity-50 cursor-not-allowed"
+            >
+              Coming Soon
+            </button>
+
+          </div>
+
+        </div>
 
       </div>
 
     </main>
+
   );
+
 }

@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
+import integrationsRoutes from "./routes/integrations.routes.js";
 import videoRoutes from "./routes/video.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
@@ -27,5 +27,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 
 app.use("/api/library", libraryRoutes);
+
+app.use("/api/integrations", integrationsRoutes);
 
 export default app;

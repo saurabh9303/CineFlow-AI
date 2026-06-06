@@ -7,6 +7,11 @@ const platformSchema = new mongoose.Schema(
          default: false,
       },
 
+      videoId: {
+         type: String,
+         default: null,
+      },
+
       url: {
          type: String,
          default: null,

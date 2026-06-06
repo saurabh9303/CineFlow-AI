@@ -68,6 +68,11 @@ const userSchema = new mongoose.Schema({
             default: ""
          },
 
+         channelHandle: {
+            type: String,
+            default: ""
+         },
+
          refreshToken: {
             type: String,
             default: ""

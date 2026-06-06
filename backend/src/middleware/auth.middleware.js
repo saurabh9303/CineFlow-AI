@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 export const authMiddleware = (req, res, next) => {
 
    const token = req.cookies?.token;
+   console.log("🍪 COOKIE TOKEN:", token);
 
    if (!token) {
       return res.status(401).json({
@@ -16,7 +17,8 @@ export const authMiddleware = (req, res, next) => {
    }
 
    try {
-
+      console.log("🔐 JWT SECRET EXISTS:", !!process.env.JWT_SECRET);
+      console.log("TOKEN BEFORE VERIFY:", token);
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // only trust ID from token
