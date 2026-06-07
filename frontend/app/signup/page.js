@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
-
    const router = useRouter();
 
    const [formData, setFormData] = useState({
@@ -18,34 +17,23 @@ export default function SignupPage() {
    const [loading, setLoading] = useState(false);
 
    const handleChange = (e) => {
-
       setFormData({
          ...formData,
          [e.target.name]: e.target.value
       });
-
    };
 
    const validate = () => {
-
       const { name, email, password } = formData;
 
-      if (!name || !email || !password) {
-         return "All fields are required";
-      }
-
-      if (password.length < 6) {
-         return "Password must be at least 6 characters";
-      }
+      if (!name || !email || !password) return "All fields are required";
+      if (password.length < 6) return "Password must be at least 6 characters";
 
       return null;
-
    };
 
    const handleSignup = async () => {
-
       const err = validate();
-
       if (err) {
          setError(err);
          return;
@@ -56,21 +44,16 @@ export default function SignupPage() {
       setLoading(true);
 
       try {
-
          const res = await fetch("http://localhost:8000/api/auth/register", {
             method: "POST",
-            headers: {
-               "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify(formData)
          });
 
          const data = await res.json();
 
-         if (!res.ok) {
-            throw new Error(data.message || "Signup failed");
-         }
+         if (!res.ok) throw new Error(data.message || "Signup failed");
 
          setSuccess("Account created successfully 🎉");
 
@@ -79,86 +62,145 @@ export default function SignupPage() {
          }, 1000);
 
       } catch (err) {
-
          setError(err.message);
-
       } finally {
-
          setLoading(false);
-
       }
-
    };
 
    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#030712] text-white px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#030712] text-white px-4 relative overflow-hidden">
 
-         <div className="w-full max-w-[380px] border border-white/10 rounded-2xl p-6 bg-white/5 backdrop-blur">
+         {/* BACKGROUND GLOW */}
+         <div className="absolute inset-0 -z-10">
+            <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-500/20 blur-[120px] rounded-full" />
+            <div className="absolute bottom-20 right-20 w-72 h-72 bg-violet-500/20 blur-[120px] rounded-full" />
+         </div>
 
-            <h1 className="text-3xl font-bold mb-1">
-               Create Account
-            </h1>
+         {/* CARD */}
+         <div className="w-full max-w-md">
 
-            <p className="text-sm text-gray-400 mb-5">
-               Join CineFlow AI
-            </p>
+            <div className="
+               border border-white/10
+               bg-white/[0.03]
+               backdrop-blur-xl
+               rounded-3xl
+               p-8
+               shadow-[0_0_60px_rgba(34,211,238,0.08)]
+            ">
 
-            {error && (
-               <p className="text-red-400 text-sm mb-3">
-                  {error}
-               </p>
-            )}
+               {/* HEADER */}
+               <div className="text-center mb-6">
+                  <h1 className="text-3xl font-bold tracking-tight">
+                     Create account
+                  </h1>
+                  <p className="text-sm text-zinc-400 mt-2">
+                     Join CineFlow AI workspace
+                  </p>
+               </div>
 
-            {success && (
-               <p className="text-green-400 text-sm mb-3">
-                  {success}
-               </p>
-            )}
+               {/* ERROR / SUCCESS */}
+               {error && (
+                  <div className="mb-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
+                     {error}
+                  </div>
+               )}
 
-            <input
-               type="text"
-               name="name"
-               placeholder="Full Name"
-               value={formData.name}
-               onChange={handleChange}
-               className="w-full p-3 mb-3 rounded-xl bg-transparent border border-white/15 outline-none focus:border-cyan-400"
-            />
+               {success && (
+                  <div className="mb-3 text-sm text-green-400 bg-green-500/10 border border-green-500/20 p-3 rounded-xl">
+                     {success}
+                  </div>
+               )}
 
-            <input
-               type="email"
-               name="email"
-               placeholder="Email Address"
-               value={formData.email}
-               onChange={handleChange}
-               className="w-full p-3 mb-3 rounded-xl bg-transparent border border-white/15 outline-none focus:border-cyan-400"
-            />
+               {/* INPUTS */}
+               <div className="space-y-3">
 
-            <input
-               type="password"
-               name="password"
-               placeholder="Password"
-               value={formData.password}
-               onChange={handleChange}
-               className="w-full p-3 mb-4 rounded-xl bg-transparent border border-white/15 outline-none focus:border-cyan-400"
-            />
+                  <input
+                     type="text"
+                     name="name"
+                     placeholder="Full name"
+                     value={formData.name}
+                     onChange={handleChange}
+                     className="
+                        w-full px-4 py-3
+                        rounded-xl
+                        bg-white/5
+                        border border-white/10
+                        outline-none text-sm
+                        focus:border-cyan-500/50
+                        focus:ring-2 focus:ring-cyan-500/10
+                        transition
+                     "
+                  />
 
-            <button
-               onClick={handleSignup}
-               disabled={loading}
-               className="w-full bg-cyan-500 hover:bg-cyan-400 transition-all py-3 rounded-xl font-semibold disabled:opacity-50"
-            >
-               {loading ? "Creating..." : "Create Account"}
-            </button>
+                  <input
+                     type="email"
+                     name="email"
+                     placeholder="Email address"
+                     value={formData.email}
+                     onChange={handleChange}
+                     className="
+                        w-full px-4 py-3
+                        rounded-xl
+                        bg-white/5
+                        border border-white/10
+                        outline-none text-sm
+                        focus:border-cyan-500/50
+                        focus:ring-2 focus:ring-cyan-500/10
+                        transition
+                     "
+                  />
 
-            <p className="text-sm text-center text-gray-400 mt-4">
-               Already have an account?{" "}
-               <span
-                  onClick={() => router.push("/login")}
-                  className="text-cyan-400 cursor-pointer hover:underline"
+                  <input
+                     type="password"
+                     name="password"
+                     placeholder="Password"
+                     value={formData.password}
+                     onChange={handleChange}
+                     className="
+                        w-full px-4 py-3
+                        rounded-xl
+                        bg-white/5
+                        border border-white/10
+                        outline-none text-sm
+                        focus:border-cyan-500/50
+                        focus:ring-2 focus:ring-cyan-500/10
+                        transition
+                     "
+                  />
+
+               </div>
+
+               {/* BUTTON */}
+               <button
+                  onClick={handleSignup}
+                  disabled={loading}
+                  className="
+                     w-full mt-5
+                     py-3 rounded-xl
+                     font-semibold text-sm
+                     bg-gradient-to-r from-cyan-500 to-blue-500
+                     hover:scale-[1.02]
+                     active:scale-[0.98]
+                     transition
+                     disabled:opacity-50
+                  "
                >
-                  Login
-               </span>
-            </p>
+                  {loading ? "Creating account..." : "Create account"}
+               </button>
+
+               {/* FOOTER */}
+               <p className="text-xs text-center text-zinc-400 mt-5">
+                  Already have an account?{" "}
+                  <span
+                     onClick={() => router.push("/login")}
+                     className="text-cyan-400 cursor-pointer hover:underline"
+                  >
+                     Sign in
+                  </span>
+               </p>
+
+            </div>
 
          </div>
       </div>

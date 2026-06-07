@@ -6,6 +6,7 @@ import videoRoutes from "./routes/video.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import libraryRoutes from "./routes/library.routes.js";
+import youtubeRoutes from "./routes/youtube.route.js";
 
 const app = express();
 
@@ -29,5 +30,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/library", libraryRoutes);
 
 app.use("/api/integrations", integrationsRoutes);
+
+app.use("/api/youtube", youtubeRoutes);
 
 export default app;
